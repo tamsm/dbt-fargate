@@ -1,0 +1,8 @@
+.idea/
+
+components/base/**
+# tf
+*.terraform.lock.hcl
+**/.terraform/*
+**/.terraform.*
+.terraform/
