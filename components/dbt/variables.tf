@@ -13,6 +13,16 @@ variable "project_dir" {
   description = "Path to dbt project directory, used for s3 upload"
 }
 
+variable "dbt_dir" {
+  type        = string
+  description = "The dbt project directory name"
+}
+
+variable "executions" {
+#  type        = list(map(string, string, list(string)))
+  description = "The list of scheduled ecs task executions, each containing a schedule expression and command array"
+}
+
 variable "log_configuration" {
   type        = any
   default     = null

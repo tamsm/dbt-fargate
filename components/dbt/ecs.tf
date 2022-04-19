@@ -7,27 +7,19 @@ module "dbt_ecs" {
   source = "github.com/cloudposse/terraform-aws-ecs-container-definition?ref=0.57.0"
   # version = "0.57.0"
   container_name   = "${module.dbt_labels.id}-executor"
-  container_image  = "public.ecr.aws/amazonlinux/amazonlinux:2"
+  container_image  = "public.ecr.aws/v6j5p4v4/kozmischeheide/dbt"
   container_memory = 100
   essential        = true
 
-  entrypoint = ["/usr/bin/env", "bash", "-c"]
-  command = [<<EOT
-for file in ${var.project_dir}/*
-do
-  echo $file
-  cat $file
-done
-EOT
-  ]
+  command = ["compile", "--profiles-dir", "/usr/app/"]
 
   log_configuration = {
     logDriver = "awslogs"
     options = {
       awslogs-region        = var.region
-      awslogs-group         = module.dbt_labels.id
+      awslogs-group         = aws_cloudwatch_log_group.logs.name
+      awslogs-stream-prefix = aws_cloudwatch_log_stream.log_stream.name
       awslogs-stream-prefix = "ecs"
-      awslogs-create-group  = true
     }
   }
 }
@@ -36,8 +28,8 @@ resource "aws_ecs_task_definition" "this" {
   family                   = module.dbt_labels.id
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = 512
-  memory                   = 1024
+  cpu                      = 256
+  memory                   = 512
   container_definitions    = "[${module.dbt_ecs.json_map_encoded}]"
   execution_role_arn       = aws_iam_role.execution.arn
   volume {
@@ -96,4 +88,15 @@ resource "aws_iam_role_policy" "execution" {
 resource "aws_iam_role" "execution" {
   name               = "${module.dbt_labels.id}-execution"
   assume_role_policy = data.aws_iam_policy_document.service.json
+}
+
+resource "aws_cloudwatch_log_group" "logs" {
+  name              = "/ecs/${module.dbt_labels.id}"
+  retention_in_days = 14
+  tags              = module.dbt_labels.tags
+}
+
+resource "aws_cloudwatch_log_stream" "log_stream" {
+  log_group_name = aws_cloudwatch_log_group.logs.name
+  name           = module.dbt_labels.id
 }
