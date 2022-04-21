@@ -33,7 +33,9 @@ locals {
 module "dbt" {
   source      = "../../../components/dbt"
   region      = "eu-west-1"
+  vpc_id      = module.vpc.vpc_id
   subnets     = module.vpc.private_subnets
+  subnet_arns = module.vpc.private_subnet_arns
   project_dir = local.project_dir
   dbt_dir     = local.dbt_dir
   executions  = local.executions

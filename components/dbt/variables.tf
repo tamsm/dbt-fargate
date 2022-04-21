@@ -2,10 +2,20 @@ variable "region" {
   type        = string
   description = "Deployment target region"
 }
+variable "vpc_id" {
+  type = string
+}
+
 variable "subnets" {
   type        = list(string)
   default     = []
-  description = "Ideally use private subnet/s"
+  description = "Destination subnets used ECS tasks. Ideally use private"
+}
+
+variable "subnet_arns" {
+  type        = list(string)
+  default     = []
+  description = "Destination subnets used ECS tasks. Ideally use private"
 }
 
 variable "project_dir" {
